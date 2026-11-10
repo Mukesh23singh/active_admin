@@ -1,6 +1,18 @@
-Then /^I should see (\d+) ([\w]*) in the table$/ do |count, resource_type|
-  expect(page).to \
-    have_css("table.index_table tr > td:first-child", count: count.to_i)
+# frozen_string_literal: true
+Then(/^I should see (\d+) ([\w]*) in the table$/) do |count, resource_type|
+  expect(page).to have_css(".data-table tr > td:first-child", count: count.to_i)
+end
+
+Then("I should see {string} in the table") do |string|
+  expect(page).to have_css(".data-table tr > td", text: string)
+end
+
+Then("I should not see {string} in the table") do |string|
+  expect(page).to have_no_css(".data-table tr > td", text: string)
+end
+
+Then(/^I should see an id_column link to edit page$/) do
+  expect(page).to have_css(".data-table a[href*='/edit']", text: /^\d+$/)
 end
 
 # TODO: simplify this, if possible?
@@ -26,10 +38,10 @@ class HtmlTableToTextHelper
     input = td.css("input").last
 
     if input
-      str << input_to_string(input)
+      str += input_to_string(input)
     end
 
-    str << td.content.strip.gsub("\n", " ")
+    str + td.content.strip.tr("\n", " ")
   end
 
   def input_to_string(input)
@@ -37,9 +49,9 @@ class HtmlTableToTextHelper
     when "checkbox"
       "[ ]"
     else
-      # :nocov:
+      # simplecov:disable
       raise "I don't know what to do with #{input}"
-      # :nocov:
+      # simplecov:enable
     end
   end
 end
@@ -63,22 +75,22 @@ module TableMatchHelper
         begin
           assert_cells_match(cell, expected_cell)
         rescue
-          # :nocov:
+          # simplecov:disable
           puts "Cell at line #{row_index} and column #{column_index}: #{cell.inspect} does not match #{expected_cell.inspect}"
           puts "Expecting:"
           table.each { |row| puts row.inspect }
           puts "to match:"
           expected_table.each { |row| puts row.inspect }
           raise $!
-          # :nocov:
+          # simplecov:enable
         end
       end
     end
   end
 
   def assert_cells_match(cell, expected_cell)
-    if expected_cell =~ /^\/.*\/$/
-      expect(cell).to match /#{expected_cell[1..-2]}/
+    if /^\/.*\/$/.match?(expected_cell)
+      expect(cell).to match(/#{expected_cell[1..-2]}/)
     else
       expect((cell || "").strip).to eq expected_cell
     end
@@ -94,7 +106,7 @@ World(TableMatchHelper)
 #     |    /\d+/     | 27/01/12 |       $30.00 |
 #     |    /\d+/     | 12/02/12 |       $25.00 |
 #
-Then /^I should see the "([^"]*)" table:$/ do |table_id, expected_table|
+Then(/^I should see the "([^"]*)" table:$/) do |table_id, expected_table|
   expect(page).to have_css "table##{table_id}"
 
   assert_tables_match(

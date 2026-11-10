@@ -16,9 +16,9 @@ Feature: Belongs To
       end
     """
     When I go to the last author's posts
-    Then the "Users" tab should be selected
+    Then the "Users" menu item should be selected
     And I should not see a menu item for "Posts"
-    And I should see "Displaying 1 Post"
+    And I should see "Showing 1 of 1"
     And I should see a link to "Users" in the breadcrumb
     And I should see a link to "Jane Doe" in the breadcrumb
 
@@ -131,7 +131,7 @@ Feature: Belongs To
     When I go to the last author's posts
     And I follow "View"
     Then I should be on the last author's last post page
-    And the "Users" tab should be selected
+    And the "Users" menu item should be selected
 
   Scenario: When the belongs to is optional
     Given a configuration of:
@@ -142,11 +142,11 @@ Feature: Belongs To
       end
     """
     When I go to the last author's posts
-    Then the "Users" tab should be selected
+    Then the "Users" menu item should be selected
     And I should see a menu item for "Posts"
 
     When I follow "Posts"
-    Then the "Posts" tab should be selected
+    Then the "Posts" menu item should be selected
 
   Scenario: Displaying belongs to resources in main menu
     Given a configuration of:
@@ -159,4 +159,34 @@ Feature: Belongs To
     """
     When I go to the last author's posts
     And I follow "View"
-    Then the "Posts" tab should be selected
+    Then the "Posts" menu item should be selected
+
+  Scenario: Viewing the child resource index page when the resource has an `as:` alias
+    Given a configuration of:
+    """
+      ActiveAdmin.register User
+      ActiveAdmin.register Post, as: "Story" do
+        belongs_to :user, optional: true
+      end
+    """
+    When I go to the last author's stories
+    Then I should see "Showing 1 of 1"
+    And I should see a link to "Users" in the breadcrumb
+    And I should see a link to "Jane Doe" in the breadcrumb
+
+  Scenario: Viewing the child resource index page with a custom collection_name
+    Given a configuration of:
+    """
+      ActiveAdmin.register User
+      ActiveAdmin.register Post do
+        belongs_to :user, optional: true
+        controller do
+          defaults collection_name: :unstarred_posts
+        end
+      end
+    """
+    And a unstarred post with the title "In the collection" written by "Jane Doe" exists
+    And a post with the title "Outside it" written by "Jane Doe" exists
+    When I go to the last author's posts
+    Then I should see "In the collection"
+    And I should not see "Outside it"

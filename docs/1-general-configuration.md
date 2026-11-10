@@ -1,7 +1,3 @@
----
-redirect_from: /docs/1-general-configuration.html
----
-
 # General Configuration
 
 You can configure Active Admin settings in `config/initializers/active_admin.rb`.
@@ -37,11 +33,7 @@ Every page has what's called the site title on the left side of the menu bar.
 If you want, you can customize it.
 
 ```ruby
-config.site_title       = "My Admin Site"
-config.site_title_link  = "/"
-config.site_title_image = "site_image.png"
-config.site_title_image = "http://www.google.com/images/logos/google_logo_41.png"
-config.site_title_image = ->(context) { context.current_user.company.logo_url }
+config.site_title = "My Admin Site"
 ```
 
 ## Internationalization (I18n)
@@ -142,8 +134,7 @@ end
 
 ## Comments
 
-By default Active Admin includes comments on resources. Sometimes, this is
-undesired. To disable comments:
+By default Active Admin includes comments on resources. To disable comments:
 
 ```ruby
 # For the entire application:
@@ -192,33 +183,5 @@ config.comments_menu = { parent: 'Admin', priority: 1 }
 Remember to indicate where to place the comments and form with:
 
 ```ruby
-active_admin_comments
-```
-
-## Utility Navigation
-
-The "utility navigation" shown at the top right normally shows the current user
-and a link to log out. However, the utility navigation is just like any other
-menu in the system; you can provide your own menu to be rendered in its place.
-
-```ruby
-ActiveAdmin.setup do |config|
-  config.namespace :admin do |admin|
-    admin.build_menu :utility_navigation do |menu|
-      menu.add label: "ActiveAdmin.info", url: "http://www.activeadmin.info",
-                                          html_options: { target: :blank }
-      admin.add_current_user_to_menu  menu
-      admin.add_logout_button_to_menu menu
-    end
-  end
-end
-```
-
-## Footer Customization
-
-By default, Active Admin displays a "Powered by ActiveAdmin" message on every
-page. You can override this message and show domain-specific messaging:
-
-```ruby
-config.footer = "MyApp Revision v1.3"
+active_admin_comments_for(resource)
 ```

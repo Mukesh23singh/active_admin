@@ -1,7 +1,3 @@
----
-redirect_from: /docs/11-decorators.html
----
-
 # Decorators
 
 Active Admin allows you to use the decorator pattern to provide view-specific
@@ -46,6 +42,45 @@ the initializer, and responds to all the necessary methods.
 class PostDecorator
   attr_reader :post
   delegate_missing_to :post
+
+  def initialize(post)
+    @post = post
+  end
+end
+```
+
+If a given resource uses ActiveAdmin's Comments feature, then that resource's decorator class must respond to
+`model` where it returns the model instance and `decorated?` returns `true`.
+
+```ruby
+# app/decorators/post_decorator.rb
+class PostDecorator
+  attr_reader :post
+  delegate_missing_to :post
+
+  def initialize(post)
+    @post = post
+  end
+
+  def decorated?
+    true
+  end
+
+  def model
+    post
+  end
+end
+```
+
+If you use any actions with param(e.g. show, edit, destroy), your decorator
+class must explicitly delegate `to_param` to the decorated model.
+
+```ruby
+# app/decorators/post_decorator.rb
+class PostDecorator
+  attr_reader :post
+  delegate_missing_to :post
+  delegate :to_param, to: :post
 
   def initialize(post)
     @post = post

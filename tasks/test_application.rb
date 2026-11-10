@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require "fileutils"
 
 module ActiveAdmin
@@ -15,31 +16,52 @@ module ActiveAdmin
       else
         generate
       end
+      Bundler.with_original_env do
+        Kernel.system("npm install") # so tailwindcss/plugin is available for test app
+        Kernel.system("rake dependencies:vendor") # ensure flowbite is updated for test app
+        Dir.chdir(app_dir) do
+          Kernel.system("npm install @activeadmin/activeadmin")
+          Kernel.system('npm pkg set scripts.build:css="npx @tailwindcss/cli -i ./app/assets/stylesheets/active_admin.css -o ./app/assets/builds/active_admin.css --minify"')
+          Kernel.system("npm install")
+          Kernel.system("npm run build:css")
+        end
+      end
     end
 
     def generate
       FileUtils.mkdir_p base_dir
       args = %W(
         -m spec/support/#{template}.rb
+        --skip-action-cable
+        --skip-action-mailbox
+        --skip-action-text
+        --skip-active-storage
         --skip-bootsnap
-        --skip-bundle
-        --skip-gemfile
-        --skip-listen
-        --skip-spring
-        --skip-turbolinks
-        --skip-test-unit
-        --skip-coffee
-        --skip-webpack-install
+        --skip-brakeman
+        --skip-bundler-audit
+        --skip-ci
+        --skip-decrypted-diffs
+        --skip-dev-gems
+        --skip-docker
+        --skip-git
+        --skip-hotwire
+        --skip-jbuilder
+        --skip-kamal
+        --skip-rubocop
+        --skip-solid
+        --skip-system-test
+        --skip-test
+        --skip-thruster
+        --javascript=importmap
       )
-
-      args << "--skip-turbolinks" unless turbolinks_app?
-      args << "--skip-sprockets" if webpacker_app?
 
       command = ["bundle", "exec", "rails", "new", app_dir, *args].join(" ")
 
       env = { "BUNDLE_GEMFILE" => expanded_gemfile, "RAILS_ENV" => rails_env }
 
-      Bundler.with_original_env { abort unless Kernel.system(env, command) }
+      Bundler.with_original_env do
+        Kernel.system(env, command)
+      end
     end
 
     def full_app_dir
@@ -63,21 +85,13 @@ module ActiveAdmin
     end
 
     def app_name
-      return "rails_61" if main_app?
+      return "rails_81" if main_app?
 
       File.basename(File.dirname(gemfile))
     end
 
     def main_app?
       expanded_gemfile == File.expand_path("Gemfile")
-    end
-
-    def turbolinks_app?
-      expanded_gemfile == File.expand_path("gemfiles/rails_61_turbolinks/Gemfile")
-    end
-
-    def webpacker_app?
-      expanded_gemfile == File.expand_path("gemfiles/rails_60_webpacker/Gemfile")
     end
 
     def gemfile

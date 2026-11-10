@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveAdmin
   # @private
   class Router
@@ -20,7 +21,7 @@ module ActiveAdmin
         if namespace.root?
           router.root namespace.root_to_options.merge(to: namespace.root_to)
         else
-          router.namespace namespace.name, namespace.route_options.dup do
+          router.namespace namespace.name, **namespace.route_options.dup do
             router.root namespace.root_to_options.merge(to: namespace.root_to, as: :root)
           end
         end
@@ -64,10 +65,10 @@ module ActiveAdmin
 
     def page_routes(config)
       page = config.underscored_resource_name
-      router.get "/#{page}" => "#{page}#index"
+      router.get "/#{page}", to: "#{page}#index"
       config.page_actions.each do |action|
         Array.wrap(action.http_verb).each do |verb|
-          build_route(verb, "/#{page}/#{action.name}" => "#{page}##{action.name}")
+          build_route(verb, "/#{page}/#{action.name}", to: "#{page}##{action.name}")
         end
       end
     end
@@ -90,8 +91,8 @@ module ActiveAdmin
       build_route(action.http_verb, action.name)
     end
 
-    def build_route(verbs, *args)
-      Array.wrap(verbs).each { |verb| router.send(verb, *args) }
+    def build_route(verbs, ...)
+      Array.wrap(verbs).each { |verb| router.send(verb, ...) }
     end
 
     def define_belongs_to_routes(config)
@@ -106,7 +107,7 @@ module ActiveAdmin
     end
 
     def define_namespace(config)
-      router.namespace config.namespace.name, config.namespace.route_options.dup do
+      router.namespace config.namespace.name, **config.namespace.route_options.dup do
         define_routes(config)
       end
     end

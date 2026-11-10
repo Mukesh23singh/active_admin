@@ -1,4 +1,4 @@
-require "active_admin/resource"
+# frozen_string_literal: true
 
 module ActiveAdmin
   class Resource

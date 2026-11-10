@@ -1,0 +1,24 @@
+name: Typos
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  checks: write
+
+jobs:
+  typos:
+    name: Run typos
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: reviewdog/action-typos@v1
+        with:
+          fail_level: any
+          filter_mode: nofilter # added (default), diff_context, file, nofilter
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-check

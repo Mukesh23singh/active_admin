@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require "rails_helper"
 
 RSpec.describe ActiveAdmin::Namespace, "registering a resource" do
@@ -27,6 +28,16 @@ RSpec.describe ActiveAdmin::Namespace, "registering a resource" do
     it "should create a menu item" do
       expect(menu["Categories"]).to be_a ActiveAdmin::MenuItem
       expect(menu["Categories"].instance_variable_get(:@url)).to be_a Proc
+    end
+  end
+
+  context "when resource class is a string" do
+    before do
+      namespace.register 'Category'
+    end
+
+    it "should store the namespaced registered configuration" do
+      expect(namespace.resources.keys).to include("Category")
     end
   end
 
@@ -77,7 +88,7 @@ RSpec.describe ActiveAdmin::Namespace, "registering a resource" do
     end
 
     it "should return the resource if it and it's parent were registered" do
-      user = namespace.register User
+      namespace.register User
       publisher = namespace.register Publisher
       expect(namespace.resource_for(Publisher)).to eq publisher
     end

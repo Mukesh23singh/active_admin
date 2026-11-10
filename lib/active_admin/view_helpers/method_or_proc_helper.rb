@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # Utility methods for internal use.
 # @private
 module MethodOrProcHelper
@@ -90,7 +91,7 @@ module MethodOrProcHelper
     context = self if context.nil? # default to `self` only when nil
     case obj
     when Proc
-      context.instance_exec *args, &obj
+      context.instance_exec(*args, &obj)
     when Symbol
       context.public_send obj, *args
     else

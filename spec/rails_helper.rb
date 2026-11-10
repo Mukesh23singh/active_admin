@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require "spec_helper"
 
 ENV["RAILS_ENV"] = "test"
@@ -12,6 +13,7 @@ require "rspec/rails"
 # it allover the place
 ActiveAdmin.application.authentication_method = false
 ActiveAdmin.application.current_user_method = false
+ActiveAdmin.application.load!
 
 RSpec.configure do |config|
   config.use_transactional_fixtures = true
@@ -25,4 +27,4 @@ RSpec.configure do |config|
 end
 
 # Force deprecations to raise an exception.
-ActiveSupport::Deprecation.behavior = :raise
+ActiveAdmin::DeprecationHelper.behavior = :raise

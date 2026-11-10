@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveAdmin
   # This is a container for resources, which acts much like a Hash.
   # It's assumed that an added resource responds to `resource_name`.
@@ -21,7 +22,7 @@ module ActiveAdmin
 
     # Changes `each` to pass in the value, instead of both the key and value.
     def each(&block)
-      values.each &block
+      values.each(&block)
     end
 
     def [](obj)

@@ -1,7 +1,3 @@
----
-redirect_from: /docs/13-authorization-adapter.html
----
-
 # Authorization Adapter
 
 Active Admin offers the ability to define and use your own authorization

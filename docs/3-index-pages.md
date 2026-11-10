@@ -1,19 +1,10 @@
----
-redirect_from: /docs/3-index-pages.html
----
-
 # Customizing the Index Page
 
 Filtering and listing resources is one of the most important tasks for
 administering a web application. Active Admin provides many different tools for
 you to build a compelling interface into your data for the admin staff.
 
-Built in, Active Admin has the following index renderers:
-
-* *Table*: A table drawn with each row being a resource ([View Table Docs](3-index-pages/index-as-table.md))
-* *Grid*: A set of rows and columns each cell being a resource ([View Grid Docs](3-index-pages/index-as-grid.md))
-* *Blocks*: A set of rows (not tabular) each row being a resource ([View Blocks Docs](3-index-pages/index-as-block.md))
-* *Blog*: A title and body content, similar to a blog index ([View Blog Docs](3-index-pages/index-as-blog.md))
+Built in, Active Admin has the *Table* index renderer. ([View Table Docs](3-index-as-table.md))
 
 All index pages also support scopes, filters, pagination, action items, and
 sidebar sections.
@@ -54,9 +45,36 @@ end
 
 ## Custom Index
 
-Active Admin does not limit the index page to be a table, block, blog or grid.
-If you've created your own [custom index](3-index-pages/custom-index.md) page it
-can be included by setting `:as` to the class of the index component you created.
+If the supplied Active Admin index components are insufficient for your project
+feel free to define your own. Index classes inherit from `ActiveAdmin::Component`
+and require a `build` method and an `index_name` class method.
+
+```ruby
+module ActiveAdmin
+  module Views
+    class IndexAsMyIdea < ActiveAdmin::Component
+
+      def build(page_presenter, collection)
+        # ...
+      end
+
+      def self.index_name
+        "my_idea"
+      end
+
+    end
+  end
+end
+```
+
+The `build` method takes a PagePresenter object and collection of whatever you
+choose.
+
+The `index_name` class method takes no arguments and returns a string that should
+be representative of the class name.
+
+Your custom index component can then be included by setting `index as: ...` to
+the class of the index component you created.
 
 ```ruby
 index as: ActiveAdmin::Views::IndexAsMyIdea do
@@ -108,19 +126,37 @@ filter :author, as: :check_boxes, collection: proc { Author.all }
 To override options for string or numeric filter pass `filters` option.
 
 ```ruby
-  filter :title, filters: [:starts_with, :ends_with]
+  filter :title, filters: [:start, :end]
 ```
 
-Also, if you don't need the select with the options 'contains', 'equals',
-'starts_with' or 'ends_with' just add the option to the filter name with an
-underscore.
+To set the same options for every string filter, instead of passing the `filters`
+option on each, use the `string_input_filters` config at the namespace or
+resource level. A resource-level setting overrides the namespace one, and the
+per-filter `filters` option still takes precedence over both.
+
+```ruby
+# config/initializers/active_admin.rb
+ActiveAdmin.setup do |config|
+  config.namespace :admin do |admin|
+    admin.string_input_filters = [:eq, :cont]
+  end
+end
+
+# app/admin/post.rb
+ActiveAdmin.register Post do
+  string_input_filters [:eq, :cont]
+end
+```
+
+Also, if you don't need the select with the options 'cont', 'eq', 'start' or
+'end' just add the option to the filter name with an underscore.
 
 For example:
 
 ```ruby
-filter :name_equals
+filter :name_eq
 # or
-filter :name_contains
+filter :name_cont
 ```
 
 You can change the filter label by passing a label option:
@@ -183,6 +219,14 @@ Or you can also remove a filter and still preserve the default filters:
 preserve_default_filters!
 remove_filter :id
 ```
+
+### Allow Filtering Attributes
+
+By default, filtering on any model attributes is denied, this is a security
+feature to prevent users from filtering (reading by guessing) attributes that
+shouldn't be accessible by them.
+To allow filtering on attributes, follow the [Ransack Authorization guide]
+to extend `ransackable_attributes` class method.
 
 ## Index Scopes
 
@@ -326,3 +370,5 @@ that you want to show up under the index collection.
 
 You'll need to use a PDF rendering library like PDFKit or WickedPDF to get the
 PDF generation you want.
+
+[Ransack Authorization guide]: https://activerecord-hackery.github.io/ransack/going-further/other-notes/#authorization-allowlistingdenylisting

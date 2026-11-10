@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveAdminContentsRollback
   def files
     @files ||= {}
@@ -37,11 +38,11 @@ end
 
 World(ActiveAdminContentsRollback)
 
-After "@changes-filesystem" do
+After "@changes-filesystem or @requires-reloading" do
   rollback!
 end
 
-Given /^"([^"]*)" contains:$/ do |filename, contents|
+Given(/^"([^"]*)" contains:$/) do |filename, contents|
   path = Rails.root + filename
   FileUtils.mkdir_p File.dirname path
   record path
@@ -49,11 +50,10 @@ Given /^"([^"]*)" contains:$/ do |filename, contents|
   File.open(path, "w+") { |f| f << contents }
 end
 
-Given /^I add "([^"]*)" to the "([^"]*)" model$/ do |code, model_name|
+Given(/^I add "([^"]*)" to the "([^"]*)" model$/) do |code, model_name|
   path = Rails.root.join "app", "models", "#{model_name}.rb"
   record path
 
-  str = File.read(path).gsub /^(class .+)$/, "\\1\n  #{code}\n"
+  str = File.read(path).gsub(/^(class .+)$/, "\\1\n  #{code}\n")
   File.open(path, "w+") { |f| f << str }
-  ActiveSupport::Dependencies.clear
 end

@@ -1,5 +1,4 @@
-if ENV["COVERAGE"] == "true"
-  require "simplecov"
+# frozen_string_literal: true
+require_relative "simplecov_helper"
 
-  SimpleCov.command_name ["regular specs", ENV["TEST_ENV_NUMBER"]].join(" ").rstrip
-end
+ActiveAdmin::TestSupport::SimpleCovHelper.start(["regular specs", ENV["TEST_ENV_NUMBER"]].join(" ").rstrip)

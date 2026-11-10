@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveAdmin
 
   # Shareable module to give a #display_on?(action) method
@@ -22,7 +23,7 @@ module ActiveAdmin
       when Symbol, String
         render_context.public_send condition
       when Proc
-        render_context.instance_exec &condition
+        render_context.instance_exec(&condition)
       else
         true
       end

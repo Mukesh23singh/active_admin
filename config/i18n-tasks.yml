@@ -1,5 +1,3 @@
----
-
 # The "main" locale
 base_locale: en
 
@@ -14,12 +12,13 @@ data:
 search:
   # Paths or `File.find` patterns to search in
   paths:
-   - app
-   - lib
+    - app
+    - lib
 
   # Files or `File.fnmatch` patterns to exclude from search
   exclude:
     - app/assets/images
+    - lib/generators
     - tasks/tmp
 
   # Guess usages such as t("categories.#{category}.title")
@@ -37,3 +36,6 @@ ignore_inconsistent_interpolations:
   - active_admin.pagination.multiple
   - active_admin.pagination.multiple_without_total
   - active_admin.blank_slate.content
+
+ignore_missing:
+  - errors.messages.not_saved # Devise

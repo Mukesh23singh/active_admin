@@ -164,20 +164,21 @@ Feature: Commenting
         ActiveAdmin.register Post
       """
     Then I should see "Comments (70)"
-    And I should see "Displaying comments 1 - 25 of 70 in total"
+    And I should see "Displaying comments 1–25 of 70 in total"
     And I should see 25 comments
-    And I should see pagination with 3 pages
+    And I should see pagination page 2 link
+    And I should see pagination page 3 link
     And I should see the pagination "Next" link
     When I follow "2"
-    Then I should see "Displaying comments 26 - 50 of 70 in total"
+    Then I should see "Displaying comments 26–50 of 70 in total"
     And I should see 25 comments
     And I should see the pagination "Next" link
     When I follow "Next"
     Then I should see 20 comments
-    And I should see "Displaying comments 51 - 70 of 70 in total"
+    And I should see "Displaying comments 51–70 of 70 in total"
     And I should not see the pagination "Next" link
 
-  Scenario: Commments through explicit helper from custom controller
+  Scenario: Comments through explicit helper from custom controller
     Given a post with the title "Hello World" written by "Jane Doe" exists
     And a show configuration of:
       """
@@ -190,7 +191,7 @@ Feature: Commenting
           end
 
           show do |post|
-            active_admin_comments
+            active_admin_comments_for(post)
           end
         end
       """
@@ -244,6 +245,27 @@ Feature: Commenting
     And I should see 3 comments
     And I should be able to add a comment
 
+  Scenario: Deleting a comment from its own show page redirects to the comments index
+    Given a show configuration of:
+      """
+        ActiveAdmin.register Post
+      """
+    When I add a comment "Hello from Comment"
+    And I am on the index page for comments
+    And I follow "View"
+    And I follow "Delete Comment"
+    Then I should be on the index page for comments
+
+  Scenario: Deleting a comment from a commentable resource's page returns to that resource
+    Given a show configuration of:
+      """
+        ActiveAdmin.register Post
+      """
+    When I add a comment "Hello from Comment"
+    And I follow "Delete Comment"
+    Then I should be in the resource section for posts
+    And I should see "Comments (0)"
+
   @authorization
   Scenario: Not authorized to create comments
     Given 5 comments added by admin with an email "commenter@example.com"
@@ -251,7 +273,7 @@ Feature: Commenting
       """
         class NoNewComments < ActiveAdmin::AuthorizationAdapter
           def authorized?(action, subject = nil)
-            if action == :create && subject == ActiveAdmin::Comment
+            if (action == :new || action == :create) && subject == ActiveAdmin::Comment
               false
             else
               true

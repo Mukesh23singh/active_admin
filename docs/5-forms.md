@@ -1,7 +1,3 @@
----
-redirect_from: /docs/5-forms.html
----
-
 # Forms
 
 Active Admin gives you complete control over the output of the form by creating
@@ -56,7 +52,7 @@ Which looks for something like this:
 
 ```ruby
 # app/views/admin/posts/_form.html.arb
-insert_tag active_admin_form_for resource do |f|
+active_admin_form_for [:admin, resource] do |f|
   inputs :title, :body
   actions
 end
@@ -71,7 +67,7 @@ Form for use the same helpers are used in the admin file:
   = semantic_form_for [:admin, @post], builder: ActiveAdmin::FormBuilder do |f|
     = f.inputs "Details" do
       = f.input :title
-    - f.has_many :taggings, sortable: :position, sortable_start: 1 do |t|
+    - f.has_many :taggings do |t|
       - t.input :tag
     = f.actions
 
@@ -97,20 +93,19 @@ ActiveAdmin.register Post do
       f.input :published_at, label: 'Publish Post At'
     end
     f.inputs 'Content', :body
-    f.inputs do
-      f.has_many :categories, heading: 'Themes',
-                              allow_destroy: true,
-                              new_record: false do |a|
+    f.inputs 'Themes' do
+      f.has_many :categories, heading: false, allow_destroy: true, new_record: false do |a|
         a.input :title
       end
     end
-    f.inputs do
-      f.has_many :taggings, sortable: :position, sortable_start: 1 do |t|
+    f.inputs 'Tags' do
+      f.has_many :taggings, heading: false do |t|
         t.input :tag
       end
     end
-    f.inputs do
+    f.inputs 'Comments' do
       f.has_many :comments,
+                 heading: false,
                  new_record: 'Leave Comment',
                  remove_record: 'Remove Comment',
                  allow_destroy: -> (c) { c.author?(current_admin_user) } do |b|
@@ -124,7 +119,7 @@ end
 ```
 
 *NOTE*: In addition to using `has_many` as illustrated above, you'll need to add
-`accepts_nested_attributes` to your parent model and [configure strong parameters](https://activeadmin.info/2-resource-customization.html)
+`accepts_nested_attributes` to your parent model and [configure strong parameters](2-resource-customization.md)
 
 The `:allow_destroy` option adds a checkbox to the end of the nested form allowing
 removal of the child object upon submission. Be sure to set `allow_destroy: true`
@@ -144,37 +139,10 @@ The `:remove_record` option controls the text of the remove button (shown after
 the new record button is pressed). If you pass a string, it will be used as the
 text for the remove button.
 
-The `:sortable` option adds a hidden field and will enable drag & drop sorting
-of the children. It expects the name of the column that will store the index of
-each child.
-
-The `:sortable_start` option sets the value (0 by default) of the first position
-in the list.
-
 ## Datepicker
 
-ActiveAdmin offers the `datepicker` input, which uses the [jQuery UI
-datepicker](http://jqueryui.com/datepicker/).  The datepicker input accepts any
-of the options available to the standard jQueryUI Datepicker. For example:
-
-```ruby
-form do |f|
-  f.input :starts_at, as: :datepicker,
-                      datepicker_options: {
-                        min_date: "2013-10-8",
-                        max_date: "+3D"
-                      }
-
-  f.input :ends_at, as: :datepicker,
-                    datepicker_options: {
-                      min_date: 3.days.ago.to_date,
-                      max_date: "+1W +5D"
-                    }
-end
-```
-
-Datepicker also accepts the `:label` option as a string or proc to display.
-If it's a proc, it will be called each time the datepicker is rendered.
+ActiveAdmin will use the native HTML date input as a default datepicker. You can
+supply your own datepicker alternative and use JS to override any date input.
 
 ## Displaying Errors
 
@@ -182,39 +150,13 @@ To display a list of all validation errors:
 
 ```ruby
 form do |f|
-  f.semantic_errors *f.object.errors.keys
+  f.semantic_errors(*f.object.errors.attribute_names)
+
   # ...
 end
 ```
 
 This is particularly useful to display errors on virtual or hidden attributes.
-
-# Tabs
-
-You can arrange content in tabs as shown below:
-
-```ruby
-  form do |f|
-    tabs do
-      tab 'Basic' do
-        f.inputs 'Basic Details' do
-          f.input :email
-          f.input :password
-          f.input :password_confirmation
-        end
-      end
-
-      tab 'Advanced', html_options: { class: 'specific_css_class' } do
-        f.inputs 'Advanced Details' do
-          f.input :role
-        end
-      end
-    end
-    f.actions
-  end
-```
-
-`html_options` allows you set additional html params for tab's menu item.
 
 # Customize the Create Another checkbox
 

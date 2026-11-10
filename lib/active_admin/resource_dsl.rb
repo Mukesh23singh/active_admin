@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveAdmin
   # This is the class where all the register blocks are evaluated.
   class ResourceDSL < DSL
@@ -39,7 +40,7 @@ module ActiveAdmin
 
     # Store relations that should be included
     def includes(*args)
-      config.includes.push *args
+      config.includes.push(*args)
     end
 
     #
@@ -153,6 +154,19 @@ module ActiveAdmin
       action config.collection_actions, name, options, &block
     end
 
+    # Set the default `filters` list for this resource's string filters.
+    # Takes priority over the namespace-level `string_input_filters` setting.
+    #
+    # For example:
+    #
+    #   ActiveAdmin.register Post do
+    #     string_input_filters [:eq, :cont]
+    #   end
+    #
+    def string_input_filters(value)
+      config.string_input_filters = value
+    end
+
     def decorate_with(decorator_class)
       # Force storage as a string. This will help us with reloading issues.
       # Assuming decorator_class.to_s will return the name of the class allows
@@ -190,25 +204,9 @@ module ActiveAdmin
     delegate :before_save, :after_save, to: :controller
     delegate :before_destroy, :after_destroy, to: :controller
 
-    # This code defines both *_filter and *_action for Rails 5.0 and  *_action for Rails >= 5.1
-    phases = [
-      :before, :skip_before,
-      :after, :skip_after,
-      :around, :skip
-    ]
-    keywords = if Rails::VERSION::MAJOR == 5 && Rails::VERSION::MINOR >= 1
-                 [:action]
-               else
-                 [:action, :filter]
-               end
-
-    keywords.each do |name|
-      phases.each do |action|
-       define_method "#{action}_#{name}" do |*args, &block|
-         controller.public_send "#{action}_action", *args, &block
-       end
-     end
-    end
+    standard_rails_filters =
+      AbstractController::Callbacks::ClassMethods.public_instance_methods.select { |m| m.end_with?('_action') }
+    delegate(*standard_rails_filters, to: :controller)
 
     # Specify which actions to create in the controller
     #

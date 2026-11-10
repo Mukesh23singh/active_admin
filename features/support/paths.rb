@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module NavigationHelpers
   # Maps a name to a path. Used by the
   #
@@ -23,17 +24,20 @@ module NavigationHelpers
 
     # the index page for posts in the user_admin namespace
     when /^the index page for (.*) in the (.*) namespace$/
-      send "#{$2}_#{$1}_path"
+      send :"#{$2}_#{$1}_path"
 
     # same as above, except defaults to admin namespace
     when /^the index page for (.*)$/
-      send "admin_#{$1}_path"
+      send :"admin_#{$1}_path"
 
     when /^the (.*) index page for (.*)$/
-      send "admin_#{$2}_path", format: $1
+      send :"admin_#{$2}_path", format: $1
 
     when /^the last author's posts$/
       admin_user_posts_path(User.last)
+
+    when /^the last author's stories$/
+      admin_user_stories_path(User.last)
 
     when /^the last author's last post page$/
       admin_user_post_path(User.last, Post.where(author_id: User.last.id).last)
@@ -61,11 +65,11 @@ module NavigationHelpers
         page_name =~ /the (.*) page/
         path_components = $1.split(/\s+/)
         self.send path_components.push("path").join("_")
-        # :nocov:
-      rescue Object => e
+        # simplecov:disable
+      rescue Object
         raise "Can't find mapping from \"#{page_name}\" to a path.\n" +
           "Now, go and add a mapping in #{__FILE__}"
-        # :nocov:
+        # simplecov:enable
       end
     end
   end

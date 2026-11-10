@@ -1,7 +1,3 @@
----
-redirect_from: /docs/8-custom-actions.html
----
-
 # Custom Controller Actions
 
 Active Admin allows you to override and modify the underlying controller which
@@ -62,7 +58,7 @@ HTTP verbs. In that case, this is the suggested approach:
 ```ruby
 member_action :foo, method: [:get, :post] do
   if request.post?
-    resource.update_attributes! foo: params[:foo] || {}
+    resource.update! foo: params[:foo] || {}
     head :ok
   else
     render :foo
@@ -132,7 +128,7 @@ post:
 
 ```ruby
 action_item :view, only: :show do
-  link_to 'View on site', post_path(post) if post.published?
+  link_to 'View on site', post_path(resource) if resource.published?
 end
 ```
 

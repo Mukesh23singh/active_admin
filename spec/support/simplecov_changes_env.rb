@@ -1,5 +1,4 @@
-if ENV["COVERAGE"] == "true"
-  require "simplecov"
+# frozen_string_literal: true
+require_relative "simplecov_helper"
 
-  SimpleCov.command_name "filesystem changes specs"
-end
+ActiveAdmin::TestSupport::SimpleCovHelper.start("filesystem changes specs")
